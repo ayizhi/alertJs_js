@@ -58,14 +58,14 @@ function AlertBox(alertId,title,obj){//小弹窗
 	var btns = obj['bottomBtn'] ? obj['bottomBtn'] : {'confirmBtn':'确定'}
 	this.bottomBtn = "";
 	for(var key in btns){
-		this.bottomBtn += '<div class = "bottomBtn ' + key + '">' + btns[key] + '</div>'
+		this.bottomBtn += '<div class = "btn bottomBtn ' + key + '">' + btns[key] + '</div>'
 	}
 
 	this.theMask = appendAlert('','theMask');
 	this.theAlertBox = appendAlert(this.alertId,'alertBox',this.theMask);
 
 	if(this.hasCloseBtn){
-		this.theCloseBtn = appendAlert('','theCloseButton',this.theAlertBox);
+		this.theCloseBtn = '<span class = "theCloseBtn"><i class = "icon-off-arrow"></i></span>'
 	}
 
 	this._init();
@@ -103,7 +103,7 @@ AlertBox.prototype = {
 
 		if(this.title){//如果有标题则设置标题
 			$(this.theAlertBox).append($(
-				'<div class = "alertTitle">' + this.title +'</div>' +
+				'<div class = "alertTitle">' + '<span>' + this.title + '</span>' + this.theCloseBtn + '</div>' +
 				'<div class = "alertBody"></div>' +
 				'<div class = "alertFooter">' + this.bottomBtn + '</div>'
 			))
@@ -128,7 +128,6 @@ AlertBox.prototype = {
 
 		$(this.theAlertBox).css({
 			'width' : this.width,
-			//'min-height' : this.height,
 			'margin': 'auto',
 			'margin-top': alertMarginTop + 'px',
 			'box-shadow':'0 0 4px #aaaaaa',
@@ -137,26 +136,6 @@ AlertBox.prototype = {
 		})
 
 
-
-		if(this.theCloseBtn){
-			var theAlertBoxWidth = $('#'+this.alertId).width();
-
-			$(this.theCloseBtn).css({//关闭按钮的样式跟显示
-				'width':'50px',
-				'height':'50px',
-				'position':'absolute',
-				'left':theAlertBoxWidth - 50 + 'px',
-				'top':0,
-				'background-color':'pink',
-				'cursor':'pointer'
-			}).html(
-				'<i class = "fa fa-close"></i>'
-			)
-
-			this.theCloseBtn.onclick = function(){
-				t.rmThis()
-			}
-		}
 
 		//设置alert内基础样式
 		$(this.theAlertBox).find('.alertTitle').css({//标题
@@ -169,6 +148,20 @@ AlertBox.prototype = {
 			'font-style':'normal',
 			'font-size':'16px',
 		})
+		if(this.theCloseBtn){
+			$(this.theAlertBox).find('.theCloseBtn').css({//关闭按钮的样式跟显示
+				'width':'50px',
+				'height':'50px',
+				'position':'absolute',
+				'right':'0',
+				'cursor':'pointer',
+			})
+
+			$(this.theAlertBox).find('.alertTitle .theCloseBtn').click(function(){
+				console.log(222)
+				t.rmThis()
+			})
+		}
 
 		$(this.theAlertBox).find('.alertBody').css({//主体
 			'padding':'30px 30px 30px 30px',
@@ -213,6 +206,7 @@ AlertBox.prototype = {
 	},
 
 	rmThis : function(){
+		console.log(11)
 		if(document.getElementById(this.alertId)){
 			$(this.theMask).remove();
 		}
@@ -267,18 +261,18 @@ function AlertWin(winId,title,obj){
 	this.height = obj['height'] ? obj['height'] : '100%';
 	this.fromDir = obj['from'] ? obj['from'] : 'bottom';
 	this.from = location[this.fromDir]
-	this.titleIcon = obj['titleIcon'] ? obj['titleIcon'] : 'fa-home';
+	this.titleIcon = obj['titleIcon'] ? obj['titleIcon'] : 'icon-off-hot';
 	var btns = obj['bottomBtn'] ? obj['bottomBtn'] : false;
 	this.bottomBtn = '';
 
 	for(var key in btns){
-		this.bottomBtn += '<div class = "bottomBtn ' + key + '">' + btns[key] + '</div>'
+		this.bottomBtn += '<div class = "btn bottomBtn ' + key + '">' + btns[key] + '</div>'
 	}
 
 	this.title = '<div class = "winTitle">' +
 		'<span class = "titleBtn icon"><i class = "' + this.titleIcon + '"></i></span>' +
 		'<span class = "title">' + this.titleName + '</span>' +
-		'<span class = "titleBtn closeBtn"><i class = "fa-close"></i></span>' +
+		'<span class = "titleBtn theCloseBtn"><i class = "icon-off-arrow"></i></span>' +
 		'</div>';
 	this.body = '<div class = "winBody"><div class = "bodyContent"></div></div>';
 	this.footer = '<div class = "winFooter">' + this.bottomBtn + '</div>'
@@ -334,14 +328,12 @@ AlertWin.prototype = {
 			'margin-left':'10px',
 			'width' : upFooterHeight + 'px',
 			'height' : upFooterHeight + 'px',
-			'background-color' :'#ccc',
 		})
-		$tWin.find('.winTitle .closeBtn').css({
+		$tWin.find('.winTitle .theCloseBtn').css({
 			'float':'right',
 			'margin-right':'10px',
 			'width' : upFooterHeight + 'px',
 			'height' : upFooterHeight + 'px',
-			'background-color' :'#ccc',
 			'cursor':'pointer',
 
 		})
@@ -393,14 +385,17 @@ AlertWin.prototype = {
 		$(document.body).append(t.$win)
 
 		var timer = setTimeout(function(){
-			t.$win.animate({'top':0,'left':0},200,'swing')
+			t.$win.animate({'top':0,'left':0},100,'swing')
 		},1)
 
 
-
+		//一些点击事件
+		$tWin.find('.winTitle .theCloseBtn').click(function(){
+			t.rmThis();
+		})
 	},
 
-	rmWin:function(){
+	rmThis:function(){
 		var t = this;
 		$(document.body).css({
 			'overflow':'auto',
