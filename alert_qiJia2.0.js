@@ -41,6 +41,12 @@
 	// 	    	'bottomBtn':{'className':'content'}  有几个btn写几个,默认是一个确定按钮 key为类名,value为按钮内容
 	// 		}
 
+	//封装方法
+	//rmThis
+	//appendDom
+	//bindEvent
+	//reborn
+
 //======================================================================================================================
 
 
@@ -52,8 +58,8 @@ function AlertBox(alertId,title,obj){//小弹窗
 	this.alertId = alertId;
 	this.title = title;
 	this.hasCloseBtn = (obj['hasCloseBtn'] == undefined) ? true : obj['hasCloseBtn'];
-	this.width = obj['width'] ? obj['width'] : '550px';
-	this.height = obj['height'] ? obj['height'] : '260px';
+	this.width = obj['width'] ? obj['width'] : '460px';
+	this.height = obj['height'] ? obj['height'] : '300px';
 
 	var btns = obj['bottomBtn'] ? obj['bottomBtn'] : {'confirmBtn':'确定'}
 	this.bottomBtn = "";
@@ -127,6 +133,7 @@ AlertBox.prototype = {
 
 
 		$(this.theAlertBox).css({
+			'padding':'0 20px',
 			'width' : this.width,
 			'margin': 'auto',
 			'margin-top': alertMarginTop + 'px',
@@ -158,7 +165,6 @@ AlertBox.prototype = {
 			})
 
 			$(this.theAlertBox).find('.alertTitle .theCloseBtn').click(function(){
-				console.log(222)
 				t.rmThis()
 			})
 		}
@@ -169,10 +175,9 @@ AlertBox.prototype = {
 		})
 
 		$(this.theAlertBox).find('.alertFooter').css({//按钮体
-			'height':'70px',
-			'border-top':'1px solid rgb(238, 236, 236)',
+			'height':'80px',
 			'text-align':'center',
-			'line-height':'70px',
+			'line-height':'40px',
 		}).find('.bottomBtn').css({
 			'padding':'0 30px 0 30px',
 			'height':'40px',
@@ -206,7 +211,6 @@ AlertBox.prototype = {
 	},
 
 	rmThis : function(){
-		console.log(11)
 		if(document.getElementById(this.alertId)){
 			$(this.theMask).remove();
 		}
@@ -226,13 +230,29 @@ AlertBox.prototype = {
 		if(!document.getElementById(this.alertId)){
 			this.theMask.appendChild(this.theAlertBox)
 		}
-		document.body.style.overflow = 'hidden'
+		document.body.style.overflow = 'hidden';//属性初始化
+
+		//得重新绑定事件
+		if(this.hasCloseBtn){
+			$(this.theAlertBox).find('.alertTitle .theCloseBtn').click(function(){
+				t.rmThis()
+			})
+		}
+		if(this.callback){
+			this.callback.call(this.theAlertBox);
+		}
+
+
+
+
+
 	},
 
 	appendDom : function(dom){//此处dom应为拼接好的字符串；
 		$(this.theAlertBox).find('.alertBody').append($(dom));
 	},
 	bindEvent : function(callback){
+		this.callback = callback;
 		callback.call(this.theAlertBox);
 	}
 }
@@ -290,6 +310,7 @@ function AlertWin(winId,title,obj){
 		this.$win.append($(this.footer))
 	}
 
+	this.timer = 200;
 
 	this.init();
 
@@ -301,7 +322,7 @@ AlertWin.prototype = {
 		var t = this,
 			$tWin = t.$win,
 			from = this.from,
-			upFooterHeight = 70,
+			upFooterHeight = 75,
 			winLen = $('.alertWin').length;
 
 		$tWin.css({
@@ -317,11 +338,11 @@ AlertWin.prototype = {
 		$tWin.find('.winTitle').css({
 			'width' : '100%',
 			'height' : upFooterHeight + 'px',
-			'border-bottom' : '1px solid #bbbbbb',
+			'border-bottom' : '2px solid #eee',
 			'text-align' : 'center',
 			'line-height' : upFooterHeight + 'px',
-			'color':'black',
-			'font-size':'24px',
+			'color':'#555555',
+			'font-size':'22px',
 		})
 		$tWin.find('.winTitle .icon').css({
 			'float':'left',
@@ -350,17 +371,25 @@ AlertWin.prototype = {
 			//'padding' : '30px 30px 100px 30px',
 			'height': bodyHeight,
 			'overflow-y':'scroll',
+			'background-color':'rgb(245,245,245)',
+			'padding':'0 10px',
+			'-webkit-scrollbar-track':'background-color: #b46868',// 滚动条的滑轨背景颜色
+			'-webkit-scrollbar-thumb':'background-color: rgba(0, 0, 0, 0.2)',
+			'-webkit-scrollbar-button':'background-color: #7c2929',
+			'-webkit-scrollbar-corner': 'background-color: black',
 
 		})
 		$tWin.find('.winBody .bodyContent').css({
-			'margin':'30px 30px'
+			'margin':'0px 5px',
+			'background-color':'#fff',
+			'min-height':'100%',
 		})
 
 
 		$tWin.find('.winFooter').css({
 			'height':upFooterHeight + 'px',
 			'width' : '100%',
-			'background-color' : 'rgb(245, 245, 245)',
+			'background-color' : '#eee',
 			'text-align' : 'center',
 			'line-height' : upFooterHeight + 'px',
 		}).find('.bottomBtn').css({
@@ -385,7 +414,8 @@ AlertWin.prototype = {
 		$(document.body).append(t.$win)
 
 		var timer = setTimeout(function(){
-			t.$win.animate({'top':0,'left':0},100,'swing')
+			t.$win.animate({'top':0,'left':0},t.timer,'swing');
+			clearTimeout(timer)
 		},1)
 
 
@@ -400,17 +430,41 @@ AlertWin.prototype = {
 		$(document.body).css({
 			'overflow':'auto',
 		})
-		t.$win.animate({'top': t.from['top'],'left': t.from['left']},100,'swing',function(){
+		t.$win.animate({'top': t.from['top'],'left': t.from['left']},t.timer,'swing',function(){
 			t.$win.remove();
 		})
 	},
 
+	reborn : function(){
+		var t = this;
+		if(!document.getElementById(this.winId)){
+			$(document.body).append(t.$win)
+
+			$(document.body).css({//禁止滚动
+				'overflow':'hidden',
+			})
+			t.$win.find('.winTitle .theCloseBtn').click(function(){//一些点击事件
+				t.rmThis();
+			})
+
+			if(this.callback){
+				this.callback.call(this.$win);//重新绑定事件
+			}
+
+
+			var timer = setTimeout(function(){
+				t.$win.animate({'top':0,'left':0},t.timer,'swing');
+				clearTimeout(timer)
+			},1)
+		}
+	},
 
 	appendDom : function(str){
 		this.$win.find('.winBody .bodyContent').append($(str));
 	},
 
 	bindEvent : function(callBack){
-		callBack.call(t.$win);
+		this.callback = callBack;
+		callBack.call(this.$win);
 	}
 }
